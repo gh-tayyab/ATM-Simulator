@@ -1,0 +1,12 @@
+{
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "type": "java",
+      "name": "Run ATM Simulator",
+      "request": "launch",
+      "mainClass": "main.Main",
+      "console": "integratedTerminal"
+    }
+  ]
+}

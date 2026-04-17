@@ -1,0 +1,12 @@
+{
+  "java.project.sourcePaths": [
+    "."
+  ],
+  "java.project.outputPath": "bin",
+  "java.project.referencedLibraries": [
+    "C:\\Users\\Muhammad Tayyab\\Downloads\\postgresql-42.7.9.jar",
+    "C:\\Users\\Muhammad Tayyab\\Downloads\\javafx-sdk-26\\lib\\**\\*.jar",
+    "E:\\ATM Simulator\\lib\\java-dotenv-5.jar",
+    "E:\\ATM Simulator\\lib\\kotlin-stdlib-1.jar"
+  ]
+}
