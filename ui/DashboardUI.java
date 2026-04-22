@@ -24,98 +24,104 @@ public class DashboardUI {
         title.setBounds(130, 20, 300, 30);
         screen.add(title);
 
-        // ✅ BUTTONS (NOW 6)
         JButton deposit = new JButton("Deposit");
         JButton withdraw = new JButton("Withdraw");
         JButton balance = new JButton("Balance");
         JButton miniStatement = new JButton("Mini Statement");
+        JButton transfer = new JButton("Transfer");
         JButton pinChange = new JButton("PIN Change");
         JButton exit = new JButton("Exit");
 
-        deposit.setBounds(170, 60, 150, 30);
-        withdraw.setBounds(170, 100, 150, 30);
-        balance.setBounds(170, 140, 150, 30);
-        miniStatement.setBounds(170, 180, 150, 30);
-        pinChange.setBounds(170, 220, 150, 30);
-        exit.setBounds(170, 260, 150, 30);
+        deposit.setBounds(170, 50, 150, 30);
+        withdraw.setBounds(170, 90, 150, 30);
+        balance.setBounds(170, 130, 150, 30);
+        miniStatement.setBounds(170, 170, 150, 30);
+        transfer.setBounds(170, 210, 150, 30);
+        pinChange.setBounds(170, 250, 150, 30);
+        exit.setBounds(170, 290, 150, 30);
 
         screen.add(deposit);
         screen.add(withdraw);
         screen.add(balance);
         screen.add(miniStatement);
+        screen.add(transfer);
         screen.add(pinChange);
         screen.add(exit);
 
         frame.add(screen);
 
-        // 💰 DEPOSIT
+        // DEPOSIT
         deposit.addActionListener(e -> {
+            String amount = JOptionPane.showInputDialog("Enter Amount:");
             try {
-                String amount = JOptionPane.showInputDialog(frame, "Enter Amount:");
-
-                if (amount != null && !amount.isEmpty()) {
-                    double amt = Double.parseDouble(amount);
-
-                    ATMService.deposit(cardNumber, amt);
-
-                    JOptionPane.showMessageDialog(frame, "Deposited Successfully ✅");
-                }
-
+                double amt = Double.parseDouble(amount);
+                ATMService.deposit(cardNumber, amt);
+                JOptionPane.showMessageDialog(frame, "Deposited ✅");
             } catch (Exception ex) {
-                JOptionPane.showMessageDialog(frame, "Invalid Amount ❌");
+                JOptionPane.showMessageDialog(frame, "Invalid ❌");
             }
         });
 
-        // 💸 WITHDRAW
+        // WITHDRAW
         withdraw.addActionListener(e -> {
+            String amount = JOptionPane.showInputDialog("Enter Amount:");
             try {
-                String amount = JOptionPane.showInputDialog(frame, "Enter Amount:");
-
-                if (amount != null && !amount.isEmpty()) {
-                    double amt = Double.parseDouble(amount);
-
-                    ATMService.withdraw(cardNumber, amt);
-
-                    JOptionPane.showMessageDialog(frame, "Withdraw Successful ✅");
-                }
-
+                double amt = Double.parseDouble(amount);
+                ATMService.withdraw(cardNumber, amt);
+                JOptionPane.showMessageDialog(frame, "Withdrawn ✅");
             } catch (Exception ex) {
-                JOptionPane.showMessageDialog(frame, "Invalid Amount ❌");
+                JOptionPane.showMessageDialog(frame, "Invalid ❌");
             }
         });
 
-        // 📊 BALANCE
+        // BALANCE
         balance.addActionListener(e -> {
             double bal = ATMService.getBalance(cardNumber);
-            JOptionPane.showMessageDialog(frame, "Your Balance: " + bal);
+            JOptionPane.showMessageDialog(frame, "Balance: " + bal);
         });
 
-        // 🧾 MINI STATEMENT
+        // MINI STATEMENT
         miniStatement.addActionListener(e -> {
-            String data = ATMService.getMiniStatement(cardNumber);
-
-            JTextArea area = new JTextArea(data);
+            JTextArea area = new JTextArea(ATMService.getMiniStatement(cardNumber));
             area.setEditable(false);
-
             JOptionPane.showMessageDialog(frame, new JScrollPane(area));
         });
 
-        // 🔐 PIN CHANGE
+        // TRANSFER
+        transfer.addActionListener(e -> {
+
+            String receiver = JOptionPane.showInputDialog("Receiver Card:");
+            String amount = JOptionPane.showInputDialog("Amount:");
+
+            try {
+                double amt = Double.parseDouble(amount);
+
+                boolean success = ATMService.transfer(cardNumber, receiver, amt);
+
+                if (success) {
+                    JOptionPane.showMessageDialog(frame, "Transfer Successful ✅");
+                } else {
+                    JOptionPane.showMessageDialog(frame, "Failed ❌");
+                }
+
+            } catch (Exception ex) {
+                JOptionPane.showMessageDialog(frame, "Invalid ❌");
+            }
+        });
+
+        // PIN CHANGE
         pinChange.addActionListener(e -> {
-            String newPin = JOptionPane.showInputDialog(frame, "Enter New PIN (4 digits):");
+            String newPin = JOptionPane.showInputDialog("Enter New PIN:");
 
             if (newPin != null && newPin.length() == 4) {
-
                 ATMService.changePin(cardNumber, newPin);
-
-                JOptionPane.showMessageDialog(frame, "PIN Updated Successfully ✅");
-
+                JOptionPane.showMessageDialog(frame, "PIN Updated ✅");
             } else {
                 JOptionPane.showMessageDialog(frame, "Invalid PIN ❌");
             }
         });
 
-        // 🚪 EXIT
+        // EXIT
         exit.addActionListener(e -> {
             frame.dispose();
             new LoginUI();

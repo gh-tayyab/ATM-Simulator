@@ -66,7 +66,7 @@ public class ATMService {
         }
     }
 
-    // 📊 BALANCE
+    // 📊 BALANCE (UPDATED FOR TRANSFER)
     public static double getBalance(String card) {
         double balance = 0;
 
@@ -82,7 +82,10 @@ public class ATMService {
             ResultSet rs = ps.executeQuery();
 
             while (rs.next()) {
-                if (rs.getString("type").equals("deposit")) {
+
+                String type = rs.getString("type");
+
+                if (type.equals("deposit") || type.equals("transfer_in")) {
                     balance += rs.getDouble("amount");
                 } else {
                     balance -= rs.getDouble("amount");
@@ -114,7 +117,55 @@ public class ATMService {
         }
     }
 
-    // 🧾 MINI STATEMENT (✅ FIXED POSITION)
+    // 💸 TRANSFER MONEY
+    public static boolean transfer(String senderCard, String receiverCard, double amount) {
+
+        try {
+            Connection con = DBConnection.getConnection();
+
+            // ❗ check receiver
+            PreparedStatement check = con.prepareStatement(
+                    "SELECT * FROM users WHERE card_number=?"
+            );
+            check.setString(1, receiverCard);
+            ResultSet rs = check.executeQuery();
+
+            if (!rs.next()) return false;
+
+            // ❗ check balance
+            double balance = getBalance(senderCard);
+            if (balance < amount) return false;
+
+            // ❌ prevent self transfer
+            if (senderCard.equals(receiverCard)) return false;
+
+            // ✅ sender (out)
+            PreparedStatement out = con.prepareStatement(
+                    "INSERT INTO transactions (card_number, type, amount, receiver_card) VALUES (?, 'transfer_out', ?, ?)"
+            );
+            out.setString(1, senderCard);
+            out.setDouble(2, amount);
+            out.setString(3, receiverCard);
+            out.executeUpdate();
+
+            // ✅ receiver (in)
+            PreparedStatement in = con.prepareStatement(
+                    "INSERT INTO transactions (card_number, type, amount, receiver_card) VALUES (?, 'transfer_in', ?, ?)"
+            );
+            in.setString(1, receiverCard);
+            in.setDouble(2, amount);
+            in.setString(3, senderCard);
+            in.executeUpdate();
+
+            return true;
+
+        } catch (Exception e) {
+            e.printStackTrace();
+            return false;
+        }
+    }
+
+    // 🧾 MINI STATEMENT (UPDATED)
     public static String getMiniStatement(String card) {
 
         StringBuilder statement = new StringBuilder();
@@ -133,8 +184,16 @@ public class ATMService {
             statement.append("----- MINI STATEMENT -----\n\n");
 
             while (rs.next()) {
-                statement.append(rs.getString("type"))
-                         .append(" : ")
+
+                statement.append(rs.getString("type"));
+
+                if (rs.getString("receiver_card") != null) {
+                    statement.append(" (")
+                             .append(rs.getString("receiver_card"))
+                             .append(")");
+                }
+
+                statement.append(" : ")
                          .append(rs.getDouble("amount"))
                          .append("\n");
             }
@@ -143,7 +202,7 @@ public class ATMService {
 
         } catch (Exception e) {
             e.printStackTrace();
-            return "Error loading statement ❌";
+            return "Error ❌";
         }
 
         return statement.toString();
